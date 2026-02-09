@@ -69,3 +69,7 @@ Power BI:
 2. Install dependencies:
    ```bash
    pip install -r requirements.txt
+
+
+<img width="1555" height="832" alt="image" src="https://github.com/user-attachments/assets/70cac20e-2176-48e8-8376-91cf1d0549fc" />
+
