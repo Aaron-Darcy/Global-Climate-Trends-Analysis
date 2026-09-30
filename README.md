@@ -1,75 +1,68 @@
 # Global Climate Trends Analysis
 
-End-to-end data pipeline and dashboard exploring long-term global temperature anomaly trends using Berkeley Earth country-level records (1850–2020). The project includes automated data extraction (web scraping + bulk downloads), cleaning and coverage validation, climate feature engineering, and an interactive Power BI dashboard for exploration and comparison.
+An end-to-end data pipeline and Power BI dashboard on long-term temperature anomaly trends across **226 countries**, using Berkeley Earth records from 1850 to 2020.
 
-## Project overview
+<img width="1555" alt="Power BI dashboard" src="https://github.com/user-attachments/assets/70cac20e-2176-48e8-8376-91cf1d0549fc" />
 
-**Goal:** Analyse long-term global temperature change and produce a reproducible dataset and dashboard suitable for exploratory analysis and reporting.
+## What it demonstrates
 
-**What this project demonstrates**
-- Web scraping and automated bulk data ingestion
-- Data cleaning of semi-structured text files
-- Coverage-based validation (restricting analysis to periods with reliable global reporting)
-- Feature engineering for climate analytics (trend, volatility, baseline change, z-scores, seasonality)
-- Dashboarding in Power BI for interactive exploration
+- Web scraping and automated bulk downloads
+- Cleaning semi-structured text files
+- Coverage-based validation (only analysing years where global reporting is reliable)
+- Climate feature engineering: trend, volatility, baseline change, z-scores, seasonality
+- An interactive Power BI dashboard
 
-## Data source
+## Data
 
-- **Berkeley Earth Temperature Archive** (monthly temperature anomalies by country)
-- Each record is an anomaly (deviation from a long-term average), enabling comparison across regions with different baseline climates.
-- Source country list page: https://berkeleyearth.org/temperature-country-list/
-
-> Note: This repo does not include the raw Berkeley Earth text files by default. The pipeline downloads raw data at runtime.
+The data is the [Berkeley Earth](https://berkeleyearth.org/temperature-country-list/) archive of monthly temperature anomalies by country. Each value is a deviation from the long-term average, so regions with very different climates can be compared.
 
 ## Method
 
-1. **Extract**
-   - Scrape the Berkeley Earth country list
-   - Normalise country names to match repository filenames
-   - Download monthly anomaly text files per country
+1. **Extract:** scrape the country list, normalise the names, and download each country's monthly anomaly file (226 of 237 downloaded successfully).
+2. **Transform:** strip metadata and malformed rows, type the columns (`year`, `month`, `anomaly`) and combine everything into one dataset of 515,429 rows.
+3. **Validate coverage:** find the first year where at least 95% of countries report data (**1892**) and filter to that point, leaving 344,422 rows.
+4. **Feature engineering:**
+   - per country: warming trend (°C/year, linear regression), volatility, mean anomaly
+   - per observation: season, baseline anomaly, change from baseline, z-score
+5. **Load:** export clean CSVs and build the Power BI dashboard.
 
-2. **Transform**
-   - Remove metadata/comment lines and malformed rows
-   - Convert to typed columns: `year`, `month`, `anomaly`
-   - Combine country files into a single dataset
-   - Perform **coverage analysis** and filter to the first year where ≥95% of countries have data (cutoff used in this project: **1892**)
+## Key findings
 
-3. **Feature engineer**
-   - Warming trend (°C/year) via linear regression
-   - Volatility (std dev of anomalies)
-   - Mean anomaly
-   - Baseline anomaly and change from baseline
-   - Season classification (Winter/Spring/Summer/Autumn)
-   - Country-level anomaly z-scores
+- The average warming trend across countries is **~0.011 °C per year**, about 1.1 °C per century.
+- Warming speeds up markedly from the late 20th century.
+- Northern regions warm faster. Antarctica has the steepest trend in the dataset (~0.018 °C/year).
+- Extreme anomalies become more frequent after about 1980.
+- Seasonal warming isn't uniform.
 
-4. **Load / Visualise**
-   - Export cleaned datasets as CSV for Power BI
-   - Build an interactive dashboard for global/country comparison
+## Repository contents
 
-## Outputs
+```
+Global_Climate_Trends_Analysis.ipynb   # full pipeline (extract → transform → features → export)
+ClimateProjectData/
+├── temperature_data_clean.csv         # filtered monthly anomalies
+└── country_features.csv               # per-country trend / volatility / mean anomaly
+Documents/
+├── Climate Change Dashboard.pbix      # Power BI dashboard
+├── Global Climate Trends Analysis - Aaron Darcy.pdf
+└── Global Climate Trends Analysis - Aaron Darcy.pptx
+requirements.txt
+```
 
-Generated files (after running the notebook/pipeline):
-- `data/processed/temperature_data_clean.csv`
-- `data/processed/country_features.csv`
+## Running it
 
-Power BI:
-- Interactive dashboard built from the exported datasets (see `assets/dashboard.png`).
+```bash
+python -m venv venv
+venv\Scripts\activate          # macOS/Linux: source venv/bin/activate
+pip install -r requirements.txt
+jupyter notebook Global_Climate_Trends_Analysis.ipynb
+```
 
-## Key findings (high level)
+The notebook downloads the raw Berkeley Earth files when it runs. Open `Documents/Climate Change Dashboard.pbix` in Power BI Desktop to explore the dashboard.
 
-- Global warming accelerates notably from the late 20th century onward.
-- Northern regions show faster warming rates.
-- Extreme anomaly events increase after ~1980.
-- Seasonal warming is not uniform, with some seasons showing higher anomalies.
+## Context
 
-## How to run
+Data Operations & Management module, MSc in Data Science (November 2025).
 
-### Option A: Notebook
-1. Create a virtual environment
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
+## Licence
 
-
-<img width="1555" height="832" alt="image" src="https://github.com/user-attachments/assets/70cac20e-2176-48e8-8376-91cf1d0549fc" />
-
+See [LICENSE](LICENSE).
